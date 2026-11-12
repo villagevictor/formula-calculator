@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Formula Calculator</title>
+    <!-- 100% Offline-Ready Embedded CSS (No External CDNs or Fonts) -->
+    <style>
+        :root {
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --bg-subtle: #f1f5f9;
+            --bg-subtle-hover: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-input: #cbd5e1;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-soft: #eef2ff;
+            --accent-border: #c7d2fe;
+            --danger: #e11d48;
+            --danger-soft: #fff1f2;
+            --danger-border: #fecdd3;
+            --warn-bg: #fffbeb;
+            --warn-border: #fde68a;
+            --warn-text: #92400e;
+            --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 4px 12px -2px rgba(79, 70, 229, 0.12);
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        html.dark {
+            --bg-page: #020617;
+            --bg-card: #0f172a;
+            --bg-input: #020617;
+            --bg-subtle: #1e293b;
+            --bg-subtle-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #1e293b;
+            --border-input: #334155;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-soft: rgba(49, 46, 129, 0.45);
+            --accent-border: rgba(99, 102, 241, 0.45);
+            --danger: #fb7185;
+            --danger-soft: rgba(136, 19, 55, 0.35);
+            --danger-border: rgba(244, 63, 94, 0.35);
+            --warn-bg: rgba(120, 53, 15, 0.35);
+            --warn-border: rgba(245, 158, 11, 0.4);
+            --warn-text: #fcd34d;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 2rem 1rem 4rem;
+        }
+
+        @media (min-width: 640px) {
+            .container {
+                padding: 2.75rem 1.5rem 5rem;
+            }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-bottom: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            background-color: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #10b981;
+        }
+
+        .header h1 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        @media (min-width: 640px) {
+            .header h1 {
+                font-size: 1.95rem;
+            }
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.925rem;
+            margin-top: 0.25rem;
+        }
+
+        .mono-inline {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Buttons */
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: inherit;
+            transition: all 0.15s ease;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem;
+            border-radius: 0.75rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .icon-btn:hover {
+            background-color: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 0.75rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+        }
+
+        .btn-subtle {
+            background-color: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .btn-subtle:hover {
+            background-color: var(--bg-subtle-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-soft);
+            color: var(--danger);
+            border: 1px solid var(--danger-border);
+        }
+
+        .btn-danger:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.28);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-ghost {
+            color: var(--accent);
+            padding: 0.4rem 0.7rem;
+            border-radius: 0.6rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--accent-soft);
+        }
+
+        /* Panels & Sections */
+        .panel {
+            margin-top: 1.75rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.15rem;
+            padding: 1.35rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (min-width: 640px) {
+            .panel {
+                padding: 1.75rem;
+            }
+        }
+
+        .panel-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.35rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .panel-subtitle {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Inputs Grid (4 Variables: A, B, H, I) */
+        .inputs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.1rem;
+        }
+
+        @media (min-width: 640px) {
+            .inputs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 960px) {
+            .inputs-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .input-group label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.45rem;
+        }
+
+        .label-left {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .var-tag {
+            width: 1.55rem;
+            height: 1.55rem;
+            border-radius: 0.45rem;
+            background-color: var(--accent-soft);
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hint-tag {
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .num-input {
+            width: 100%;
+            padding: 0.8rem 0.95rem;
+            border-radius: 0.75rem;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 1.08rem;
+            font-weight: 600;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .num-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            margin-top: 1.15rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            background-color: var(--warn-bg);
+            border: 1px solid var(--warn-border);
+            color: var(--warn-text);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        /* Results Section */
+        .results-section {
+            margin-top: 2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.15rem;
+        }
+
+        @media (min-width: 640px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 960px) {
+            .results-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .result-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1.1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .result-card:hover {
+            border-color: var(--accent-border);
+        }
+
+        .result-card.final-card {
+            border: 2px solid var(--accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        .final-ribbon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--accent);
+            color: #ffffff;
+            font-size: 0.64rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.22rem 0.65rem;
+            border-bottom-left-radius: 0.65rem;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .step-badge {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.6rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .badge-c { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .badge-d { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-e { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-f { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+        .badge-g { background: #ecfeff; color: #0891b2; border: 1px solid #a5f3fc; }
+        .badge-j { background: var(--accent); color: #ffffff; }
+
+        html.dark .badge-c { background: rgba(30, 58, 138, 0.45); color: #60a5fa; border-color: rgba(59, 130, 246, 0.35); }
+        html.dark .badge-d { background: rgba(6, 78, 59, 0.45); color: #34d399; border-color: rgba(16, 185, 129, 0.35); }
+        html.dark .badge-e { background: rgba(120, 53, 15, 0.45); color: #fbbf24; border-color: rgba(245, 158, 11, 0.35); }
+        html.dark .badge-f { background: rgba(76, 29, 149, 0.45); color: #c084fc; border-color: rgba(168, 85, 247, 0.35); }
+        html.dark .badge-g { background: rgba(22, 78, 99, 0.45); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35); }
+
+        .step-label {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .formula-label {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .copy-mini-btn {
+            padding: 0.4rem;
+            border-radius: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .copy-mini-btn:hover {
+            background-color: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .result-value {
+            font-family: var(--font-mono);
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0.4rem 0;
+            word-break: break-all;
+            cursor: help;
+        }
+
+        .final-card .result-value {
+            color: var(--accent);
+            font-size: 1.85rem;
+        }
+
+        .result-value.error-val {
+            color: var(--danger) !important;
+            font-size: 1.05rem !important;
+        }
+
+        .card-footer {
+            margin-top: 0.65rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .step-equation {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* History Table */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-radius: 0.85rem;
+            border: 1px dashed var(--border-input);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 0.7rem 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.7rem 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        tr:hover td {
+            background-color: var(--bg-subtle);
+        }
+
+        .td-input {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .td-final {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .action-link {
+            font-family: var(--font-sans);
+            font-size: 0.76rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 1.25rem;
+            right: 1.25rem;
+            z-index: 50;
+            background-color: #0f172a;
+            color: #ffffff;
+            border: 1px solid #334155;
+            padding: 0.7rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transform: translateY(5rem);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="toast" role="status" aria-live="polite">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span id="toastMessage">Copied to clipboard</span>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div>
+                <div class="badge">
+                    <span class="badge-dot"></span>
+                    100% Offline • Real-Time Engine
+                </div>
+                <h1>Automatic Formula Calculator</h1>
+                <p>
+                    Instant chained calculation for variables
+                    <span class="mono-inline">A</span>,
+                    <span class="mono-inline">B</span>,
+                    <span class="mono-inline">H</span>, and
+                    <span class="mono-inline">I</span>.
+                </p>
+            </div>
+
+            <button id="themeToggle" type="button" class="icon-btn" aria-label="Toggle Dark Mode" title="Toggle Dark / Light Theme">
+                <!-- Sun Icon -->
+                <svg id="sunIcon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <!-- Moon Icon -->
+                <svg id="moonIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Input Variables Section -->
+        <section class="panel" aria-labelledby="inputsHeading">
+            <div class="panel-header">
+                <div>
+                    <h2 id="inputsHeading" class="panel-title">Input Variables</h2>
+                    <p class="panel-subtitle">Type any value for A, B, H, or I — all 6 results update immediately.</p>
+                </div>
+                <div class="btn-group">
+                    <button id="resetBtn" type="button" class="btn btn-subtle">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        Reset Default
+                    </button>
+                    <button id="clearBtn" type="button" class="btn btn-danger">
+                        Clear All
+                    </button>
+                    <button id="saveBtn" type="button" class="btn btn-primary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Save Calculation
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4 Input Fields: A, B, H, I -->
+            <div class="inputs-grid">
+                <div class="input-group">
+                    <label for="inputA">
+                        <span class="label-left">
+                            <span class="var-tag">A</span>
+                            <span>Variable A</span>
+                        </span>
+                        <span class="hint-tag">Numerator</span>
+                    </label>
+                    <input type="number" step="any" id="inputA" value="100" placeholder="e.g. 100" class="num-input">
+                </div>
+
+                <div class="input-group">
+                    <label for="inputB">
+                        <span class="label-left">
+                            <span class="var-tag">B</span>
+                            <span>Variable B</span>
+                        </span>
+                        <span class="hint-tag">Non-zero</span>
+                    </label>
+                    <input type="number" step="any" id="inputB" value="5" placeholder="e.g. 5" class="num-input">
+                </div>
+
+                <div class="input-group">
+                    <label for="inputH">
+                        <span class="label-left">
+                            <span class="var-tag">H</span>
+                            <span>Variable H</span>
+                        </span>
+                        <span class="hint-tag">Number</span>
+                    </label>
+                    <input type="number" step="any" id="inputH" value="1000" placeholder="e.g. 1000" class="num-input">
+                </div>
+
+                <div class="input-group">
+                    <label for="inputI">
+                        <span class="label-left">
+                            <span class="var-tag">I</span>
+                            <span>Variable I</span>
+                        </span>
+                        <span class="hint-tag">Number</span>
+                    </label>
+                    <input type="number" step="any" id="inputI" value="10" placeholder="e.g. 10" class="num-input">
+                </div>
+            </div>
+
+            <!-- Inline Edge-Case Warning Banner -->
+            <div id="warningBanner" class="warning-banner hidden" role="alert">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span id="warningText">Division by zero detected.</span>
+            </div>
+        </section>
+
+        <!-- Calculated Results Pipeline (C, D, E, F, G, J) -->
+        <section class="results-section" aria-labelledby="resultsHeading">
+            <div class="panel-header" style="margin-bottom: 1rem;">
+                <div>
+                    <h2 id="resultsHeading" class="panel-title">Calculated Results Pipeline</h2>
+                    <p class="panel-subtitle">Hover any result value to inspect full floating-point precision.</p>
+                </div>
+                <button id="copyAllBtn" type="button" class="btn-ghost">
+                    Copy All Results
+                </button>
+            </div>
+
+            <div class="results-grid">
+                <!-- Card 1: C = A / B -->
+                <article class="result-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-meta">
+                                <span class="step-badge badge-c">C</span>
+                                <div>
+                                    <span class="step-label">Step 1</span>
+                                    <span class="formula-label">C = A / B</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyResult('C')" class="copy-mini-btn" title="Copy full precision C">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="valC" class="result-value" title="20">20</div>
+                    </div>
+                    <div class="card-footer">
+                        <p id="stepC" class="step-equation">100 / 5 = 20</p>
+                    </div>
+                </article>
+
+                <!-- Card 2: D = C - 10.51 -->
+                <article class="result-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-meta">
+                                <span class="step-badge badge-d">D</span>
+                                <div>
+                                    <span class="step-label">Step 2</span>
+                                    <span class="formula-label">D = C - 10.51</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyResult('D')" class="copy-mini-btn" title="Copy full precision D">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="valD" class="result-value" title="9.49">9.49</div>
+                    </div>
+                    <div class="card-footer">
+                        <p id="stepD" class="step-equation">20 - 10.51 = 9.49</p>
+                    </div>
+                </article>
+
+                <!-- Card 3: E = D * 52.838 -->
+                <article class="result-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-meta">
+                                <span class="step-badge badge-e">E</span>
+                                <div>
+                                    <span class="step-label">Step 3</span>
+                                    <span class="formula-label">E = D * 52.838</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyResult('E')" class="copy-mini-btn" title="Copy full precision E">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="valE" class="result-value" title="501.43262">501.4326</div>
+                    </div>
+                    <div class="card-footer">
+                        <p id="stepE" class="step-equation">9.49 * 52.838 = 501.4326</p>
+                    </div>
+                </article>
+
+                <!-- Card 4: F = E / C -->
+                <article class="result-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-meta">
+                                <span class="step-badge badge-f">F</span>
+                                <div>
+                                    <span class="step-label">Step 4</span>
+                                    <span class="formula-label">F = E / C</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyResult('F')" class="copy-mini-btn" title="Copy full precision F">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="valF" class="result-value" title="25.071631">25.0716</div>
+                    </div>
+                    <div class="card-footer">
+                        <p id="stepF" class="step-equation">501.4326 / 20 = 25.0716</p>
+                    </div>
+                </article>
+
+                <!-- Card 5: G = (H * I / 31.1035) * 1.15 -->
+                <article class="result-card">
+                    <div>
+                        <div class="card-top">
+                            <div class="card-meta">
+                                <span class="step-badge badge-g">G</span>
+                                <div>
+                                    <span class="step-label">Step 5 (+15%)</span>
+                                    <span class="formula-label">G = (H * I / 31.1035) * 1.15</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyResult('G')" class="copy-mini-btn" title="Copy full precision G">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="valG" class="result-value" title="369.7333097561368">369.7333</div>
+                    </div>
+                    <div class="card-footer">
+                        <p id="stepG" class="step-equation">(1000 * 10 / 31.1035) * 1.15 = 369.7333</p>
+                    </div>
+                </article>
+
+                <!-- Card 6: J = (F * A * G) / 24 (Final Output) -->
+                <article class="result-card final-card">
+                    <span class="final-ribbon">Final Output</span>
+                    <div>
+                        <div class="card-top" style="margin-top: 0.35rem;">
+                            <div class="card-meta">
+                                <span class="step-badge badge-j">J</span>
+                                <div>
+                                    <span class="step-label" style="color: var(--accent);">Step 6</span>
+                                    <span class="formula-label">J = (F * A * G) / 24</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="copyResult('J')" class="copy-mini-btn" title="Copy full precision J">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="valJ" class="result-value" title="38624.234525809325">38,624.2345</div>
+                    </div>
+                    <div class="card-footer">
+                        <p id="stepJ" class="step-equation">(25.0716 * 100 * 369.7333) / 24 = 38624.2345</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Saved Calculations History Log -->
+        <section class="panel" aria-labelledby="historyHeading">
+            <div class="panel-header">
+                <div>
+                    <h2 id="historyHeading" class="panel-title">Saved Calculations History Log</h2>
+                    <p class="panel-subtitle">Recorded snapshots of your formula runs (stored locally in session).</p>
+                </div>
+                <div id="historyActions" class="btn-group hidden">
+                    <button id="exportCsvBtn" type="button" class="btn btn-subtle">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export CSV
+                    </button>
+                    <button id="clearHistoryBtn" type="button" class="btn btn-danger">
+                        Clear Log
+                    </button>
+                </div>
+            </div>
+
+            <div id="emptyHistory" class="empty-state">
+                No calculations saved yet. Click <strong>"Save Calculation"</strong> above to log a result.
+            </div>
+
+            <div id="historyTableWrapper" class="table-wrapper hidden">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>H</th>
+                            <th>I</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                            <th>G</th>
+                            <th style="color: var(--accent);">J</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Self-Contained Offline Application Logic -->
+    <script>
+        // Application State
+        let currentResults = {
+            valid: false,
+            A: null, B: null, H: null, I: null,
+            C: null, D: null, E: null, F: null, G: null, J: null
+        };
+
+        let historyLog = [];
+
+        // Input Elements
+        const inputA = document.getElementById('inputA');
+        const inputB = document.getElementById('inputB');
+        const inputH = document.getElementById('inputH');
+        const inputI = document.getElementById('inputI');
+
+        // Output Value Elements
+        const valC = document.getElementById('valC');
+        const valD = document.getElementById('valD');
+        const valE = document.getElementById('valE');
+        const valF = document.getElementById('valF');
+        const valG = document.getElementById('valG');
+        const valJ = document.getElementById('valJ');
+
+        // Step Substitution Elements
+        const stepC = document.getElementById('stepC');
+        const stepD = document.getElementById('stepD');
+        const stepE = document.getElementById('stepE');
+        const stepF = document.getElementById('stepF');
+        const stepG = document.getElementById('stepG');
+        const stepJ = document.getElementById('stepJ');
+
+        // Warning Elements
+        const warningBanner = document.getElementById('warningBanner');
+        const warningText = document.getElementById('warningText');
+
+        // Format display numbers cleanly up to 4 decimal places
+        function formatNumber(num) {
+            if (num === null || num === undefined || !isFinite(num)) return '—';
+            const rounded = Math.round((num + Number.EPSILON) * 10000) / 10000;
+            return rounded.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 4
+            });
+        }
+
+        // Format raw numbers without thousands commas for equations & table cells
+        function formatRaw(num) {
+            if (num === null || num === undefined || !isFinite(num)) return '—';
+            return String(Math.round((num + Number.EPSILON) * 10000) / 10000);
+        }
+
+        // Core Real-Time Calculation Engine
+        function calculate() {
+            const rawA = inputA.value.trim();
+            const rawB = inputB.value.trim();
+            const rawH = inputH.value.trim();
+            const rawI = inputI.value.trim();
+
+            warningBanner.classList.add('hidden');
+
+            const A = rawA === '' ? NaN : parseFloat(rawA);
+            const B = rawB === '' ? NaN : parseFloat(rawB);
+            const H = rawH === '' ? NaN : parseFloat(rawH);
+            const I = rawI === '' ? NaN : parseFloat(rawI);
+
+            // Calculate Step 5 (G) independently whenever H and I are valid numbers
+            let G = null;
+            if (!isNaN(H) && !isNaN(I)) {
+                // G = H * I / 31.1035 + 15%
+                G = ((H * I) / 31.1035) * 1.15;
+                valG.classList.remove('error-val');
+                valG.textContent = formatNumber(G);
+                valG.title = `Full precision: ${G}`;
+                stepG.textContent = `(${formatRaw(H)} * ${formatRaw(I)} / 31.1035) * 1.15 = ${formatRaw(G)}`;
+            } else {
+                valG.classList.remove('error-val');
+                valG.textContent = '—';
+                valG.title = '';
+                stepG.textContent = 'Enter values for H and I';
+            }
+
+            // Validate A and B for Steps 1–4
+            if (isNaN(A) || isNaN(B)) {
+                [valC, valD, valE, valF, valJ].forEach(el => {
+                    el.classList.remove('error-val');
+                    el.textContent = '—';
+                    el.title = '';
+                });
+                stepC.textContent = 'Enter values for A and B';
+                stepD.textContent = '—';
+                stepE.textContent = '—';
+                stepF.textContent = '—';
+                stepJ.textContent = '—';
+                currentResults = { valid: false, A: isNaN(A) ? null : A, B: isNaN(B) ? null : B, H: isNaN(H) ? null : H, I: isNaN(I) ? null : I, C: null, D: null, E: null, F: null, G, J: null };
+                return;
+            }
+
+            // Edge Case 1: B === 0 (Division by zero in C = A / B)
+            if (B === 0) {
+                warningText.textContent = 'Variable B cannot be 0 because C = A / B would divide by zero.';
+                warningBanner.classList.remove('hidden');
+
+                valC.textContent = 'Cannot divide by 0';
+                valC.title = 'Undefined (Division by 0)';
+                valC.classList.add('error-val');
+                stepC.textContent = `${formatRaw(A)} / 0 = Undefined`;
+
+                [valD, valE, valF, valJ].forEach(el => {
+                    el.classList.remove('error-val');
+                    el.textContent = '—';
+                    el.title = '';
+                });
+                stepD.textContent = 'Waiting for valid C';
+                stepE.textContent = 'Waiting for valid D';
+                stepF.textContent = 'Waiting for valid E & C';
+                stepJ.textContent = 'Waiting for valid F';
+
+                currentResults = { valid: false, A, B, H: isNaN(H) ? null : H, I: isNaN(I) ? null : I, C: null, D: null, E: null, F: null, G, J: null };
+                return;
+            }
+
+            // Step 1: C = A / B
+            const C = A / B;
+            valC.classList.remove('error-val');
+            valC.textContent = formatNumber(C);
+            valC.title = `Full precision: ${C}`;
+            stepC.textContent = `${formatRaw(A)} / ${formatRaw(B)} = ${formatRaw(C)}`;
+
+            // Step 2: D = C - 10.51
+            const D = C - 10.51;
+            valD.classList.remove('error-val');
+            valD.textContent = formatNumber(D);
+            valD.title = `Full precision: ${D}`;
+            stepD.textContent = `${formatRaw(C)} - 10.51 = ${formatRaw(D)}`;
+
+            // Step 3: E = D * 52.838
+            const E = D * 52.838;
+            valE.classList.remove('error-val');
+            valE.textContent = formatNumber(E);
+            valE.title = `Full precision: ${E}`;
+            stepE.textContent = `${formatRaw(D)} * 52.838 = ${formatRaw(E)}`;
+
+            // Edge Case 2: C === 0 when A === 0 (Division by zero in F = E / C)
+            if (C === 0) {
+                warningText.textContent = 'Since A is 0, C equals 0. Therefore, F = E / C cannot divide by zero.';
+                warningBanner.classList.remove('hidden');
+
+                valF.textContent = 'Cannot divide by 0';
+                valF.title = 'Undefined (Division by 0)';
+                valF.classList.add('error-val');
+                stepF.textContent = `${formatRaw(E)} / 0 = Undefined`;
+
+                valJ.classList.remove('error-val');
+                valJ.textContent = '—';
+                valJ.title = '';
+                stepJ.textContent = 'Waiting for valid F';
+
+                currentResults = { valid: false, A, B, H: isNaN(H) ? null : H, I: isNaN(I) ? null : I, C, D, E, F: null, G, J: null };
+                return;
+            }
+
+            // Step 4: F = E / C
+            const F = E / C;
+            valF.classList.remove('error-val');
+            valF.textContent = formatNumber(F);
+            valF.title = `Full precision: ${F}`;
+            stepF.textContent = `${formatRaw(E)} / ${formatRaw(C)} = ${formatRaw(F)}`;
+
+            // Step 6: J = (F * A * G) / 24
+            if (G === null || !isFinite(G)) {
+                valJ.classList.remove('error-val');
+                valJ.textContent = '—';
+                valJ.title = '';
+                stepJ.textContent = 'Waiting for valid H and I to compute G';
+                currentResults = { valid: false, A, B, H: isNaN(H) ? null : H, I: isNaN(I) ? null : I, C, D, E, F, G: null, J: null };
+                return;
+            }
+
+            const J = (F * A * G) / 24;
+            valJ.classList.remove('error-val');
+            valJ.textContent = formatNumber(J);
+            valJ.title = `Full precision: ${J}`;
+            stepJ.textContent = `(${formatRaw(F)} * ${formatRaw(A)} * ${formatRaw(G)}) / 24 = ${formatRaw(J)}`;
+
+            currentResults = { valid: true, A, B, H, I, C, D, E, F, G, J };
+        }
+
+        // Offline Clipboard Copy (execCommand fallback for full compatibility)
+        function copyToClipboard(text, label) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(label || `Copied: ${text}`);
+            } catch (err) {
+                showToast('Unable to copy to clipboard');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function copyResult(key) {
+            const val = currentResults[key];
+            if (val === null || val === undefined || !isFinite(val)) {
+                showToast(`No valid value for ${key} to copy`);
+                return;
+            }
+            const fullPrecision = String(val);
+            copyToClipboard(fullPrecision, `Copied ${key} = ${fullPrecision}`);
+        }
+
+        // Toast Notification
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        // Render History Log Table
+        function renderHistory() {
+            const emptyState = document.getElementById('emptyHistory');
+            const tableWrapper = document.getElementById('historyTableWrapper');
+            const historyActions = document.getElementById('historyActions');
+            const tbody = document.getElementById('historyBody');
+
+            if (historyLog.length === 0) {
+                emptyState.classList.remove('hidden');
+                tableWrapper.classList.add('hidden');
+                historyActions.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tableWrapper.classList.remove('hidden');
+            historyActions.classList.remove('hidden');
+
+            tbody.innerHTML = historyLog.map((item, idx) => `
+                <tr>
+                    <td class="td-input">${formatRaw(item.A)}</td>
+                    <td class="td-input">${formatRaw(item.B)}</td>
+                    <td class="td-input">${formatRaw(item.H)}</td>
+                    <td class="td-input">${formatRaw(item.I)}</td>
+                    <td title="${item.C}">${formatRaw(item.C)}</td>
+                    <td title="${item.D}">${formatRaw(item.D)}</td>
+                    <td title="${item.E}">${formatRaw(item.E)}</td>
+                    <td title="${item.F}">${formatRaw(item.F)}</td>
+                    <td title="${item.G}">${formatRaw(item.G)}</td>
+                    <td class="td-final" title="${item.J}">${formatRaw(item.J)}</td>
+                    <td style="text-align: right;">
+                        <button type="button" onclick="loadHistoryItem(${idx})" class="action-link" style="color: var(--accent);">Load</button>
+                        <button type="button" onclick="deleteHistoryItem(${idx})" class="action-link" style="color: var(--danger);">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadHistoryItem(index) {
+            const item = historyLog[index];
+            if (!item) return;
+            inputA.value = item.A;
+            inputB.value = item.B;
+            inputH.value = item.H;
+            inputI.value = item.I;
+            calculate();
+            showToast('Loaded inputs from history');
+        }
+
+        function deleteHistoryItem(index) {
+            historyLog.splice(index, 1);
+            renderHistory();
+        }
+
+        // Attach Real-Time Input Listeners
+        [inputA, inputB, inputH, inputI].forEach(el => {
+            el.addEventListener('input', calculate);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            inputA.value = '100';
+            inputB.value = '5';
+            inputH.value = '1000';
+            inputI.value = '10';
+            calculate();
+            showToast('Reset to default values (A=100, B=5, H=1000, I=10)');
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            inputA.value = '';
+            inputB.value = '';
+            inputH.value = '';
+            inputI.value = '';
+            calculate();
+            inputA.focus();
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            if (!currentResults.valid) {
+                showToast('Cannot save incomplete or invalid calculation');
+                return;
+            }
+            historyLog.unshift({ ...currentResults });
+            renderHistory();
+            showToast('Calculation saved to log');
+        });
+
+        document.getElementById('copyAllBtn').addEventListener('click', () => {
+            if (!currentResults.valid) {
+                showToast('No complete calculation to copy');
+                return;
+            }
+            const summary = `A = ${currentResults.A} | B = ${currentResults.B} | H = ${currentResults.H} | I = ${currentResults.I} | C = ${currentResults.C} | D = ${currentResults.D} | E = ${currentResults.E} | F = ${currentResults.F} | G = ${currentResults.G} | J = ${currentResults.J}`;
+            copyToClipboard(summary, 'Copied full precision summary');
+        });
+
+        document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+            historyLog = [];
+            renderHistory();
+            showToast('History log cleared');
+        });
+
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            if (historyLog.length === 0) return;
+            const headers = [
+                'A', 'B', 'H', 'I',
+                'C (A/B)',
+                'D (C-10.51)',
+                'E (D*52.838)',
+                'F (E/C)',
+                'G ((H*I/31.1035)*1.15)',
+                'J ((F*A*G)/24)'
+            ];
+            const rows = historyLog.map(r => [r.A, r.B, r.H, r.I, r.C, r.D, r.E, r.F, r.G, r.J].join(','));
+            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'automatic_formula_calculations.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Exported CSV file');
+        });
+
+        // Theme Toggle (Light / Dark)
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        function syncThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            sunIcon.classList.toggle('hidden', !isDark);
+            moonIcon.classList.toggle('hidden', isDark);
+        }
+
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        syncThemeIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            syncThemeIcons();
+        });
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', calculate);
+    </script>
+</body>
+</html>
