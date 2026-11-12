@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.villagevictor.twa",
+    "sha256_cert_fingerprints": ["7E:8F:50:04:6A:98:58:E7:6B:10:B8:9D:93:A3:74:4D:DB:D7:44:50:9F:F4:34:68:D3:60:C8:04:FD:48:23:3A"]
+  }
+}]
