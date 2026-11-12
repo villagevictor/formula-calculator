@@ -1338,5 +1338,13 @@
         // Initialize on load
         window.addEventListener('DOMContentLoaded', calculate);
     </script>
+    <link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2344/2344132.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+</script>
 </body>
 </html>
